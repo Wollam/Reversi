@@ -1,67 +1,65 @@
 import tkinter as tk
+from tkinter import Label, Scale, Button
 
 window = tk.Tk()
 canvas = tk.Canvas(window, width=480, height=600)
 canvas.pack()
+status = Label(canvas); status.place (x=240, y=60)
+skip = Button(canvas, text= "Skip your turn"); skip.place (x= 240,y= 30)
 
-player = 1
+font = ("Arial", 14)
+player = -1
 cell_size = 60
 
-
-def switch_player():
+def switch_player(ea):
     global player
     player = -player
-    
 
 def on_click(event):
     # Convert the mouse click position to a square on the board
     row = event.x // cell_size
-    col = event.y // cell_size 
+    col = (event.y - 120) // cell_size 
     move = (row, col)
-    print (move)
     make_move(board, player, move)
     draw_board()
-    
-
 
 def make_move(board, player, move):
     # Validate the move
     if not is_legal_move(board, move, player):
-        print("Illegal move!")
+        status.configure(text = "Error: Illegal move!", font=font)
         return
 
     # Update the board with the new piece
     board[move[0]][move[1]] = player
     
     # Flip any captured pieces
-    flip_pieces(board, move, player)
+    for dx in [-1, 0, 1]:
+        for dy in [-1, 0, 1]:
+            if dx == 0 and dy == 0:
+                continue
+            flip_pieces(board, move, player, dx, dy)
     
-    switch_player()
+    switch_player(None)
     draw_board()
     return True
     
-    
+def flip_pieces(board, move, player, dx, dy):
+    x, y = move[0] + dx, move[1] + dy
+    if 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
+        # There is an opposing piece in this direction, so flip it and continue
+        board[x][y] = player
+        if flip_pieces(board, move, player, dx, dy):
+            # Pieces were flipped in this direction, so flip the current piece
+            board[move[0]][move[1]] = player
+            return True
+    elif 0 <= x < 8 and 0 <= y < 8 and board[x][y] == player:
+        # We reached a friendly piece, so stop flipping
+        return True
+    else:
+        # We reached the edge of the board or an empty square, so don't flip any pieces
+        return False
 
-def flip_pieces(board, move, player):
-    row, col = move
-    directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
-
-    for dx, dy in directions:
-        x, y = row + dx, col + dy
-        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != -player:
-            continue
-        x, y = x + dx, y + dy
-        while 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
-            x, y = x + dx, y + dy
-        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != player:
-            continue
-        x, y = row + dx, col + dy
-        while board[x][y] == -player:
-            board[x][y] = player
-            x, y = x + dx, y + dy
                 
-    
-
 def is_legal_move(board, move, player):
     # Check that the move is within the bounds of the board
     if not (0 <= move[0] < len(board) and 0 <= move[1] < len(board[0])):
@@ -86,25 +84,26 @@ def is_legal_move(board, move, player):
                 return True
 
     return False
-
-def draw_cell(row, col, value):
-    x1 = row * cell_size
-    y1 = col * cell_size
-    x2 = x1 + cell_size
-    y2 = y1 + cell_size
-    color = "White"
-    if value == 1:
-        color = "Red"
-    elif value == -1:
-        color = "Blue"
-   
     
+
+
+def draw_cell(row, col, player):
+    x1 = row * cell_size
+    y1 = col * cell_size + 120
+    x2 = x1 + cell_size
+    y2 = y1 + cell_size 
+    color = "white"
+    if player == 1:
+        color = "Blue"
+        canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
+        canvas.create_oval((x1, y1), (x2, y2), fill=color)
+    elif player == -1:
+        color = "Red"
+
     canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
     if is_legal_move(board, (row, col), player): 
        canvas.create_rectangle(x1, y1, x2, y2, fill="#00FF00")
     canvas.create_oval(((x1, y1), (x2, y2)), fill=color)
-    
-    
     
 
 board =[
@@ -123,8 +122,11 @@ def draw_board():
         for col in range(len(board[0])):
             draw_cell(row, col, board[row][col])
 
-draw_board()
+            
 
+draw_board()
+skip.bind("<Button-1>", switch_player)
 canvas.bind("<Button-1>", on_click)
 
 window.mainloop()
+
