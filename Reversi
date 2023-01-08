@@ -34,11 +34,7 @@ def make_move(board, player, move):
     board[move[0]][move[1]] = player
     
     # Flip any captured pieces
-    for dx in [-1, 0, 1]:
-        for dy in [-1, 0, 1]:
-            if dx == 0 and dy == 0:
-                continue
-            flip_pieces(board, move, player, dx, dy)
+    flip_pieces(board, move, player)
     
     switch_player()
     draw_board()
@@ -46,22 +42,23 @@ def make_move(board, player, move):
     
     
 
-def flip_pieces(board, move, player, dx, dy):
-    x, y = move[0] + dx, move[1] + dy
-    if 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
-        # There is an opposing piece in this direction, so flip it and continue
-        board[x][y] = player
-        if flip_pieces(board, move, player, dx, dy):
-            # Pieces were flipped in this direction, so flip the current piece
-            board[move[0]][move[1]] = player
-            return True
-    elif 0 <= x < 8 and 0 <= y < 8 and board[x][y] == player:
-        # We reached a friendly piece, so stop flipping
-        return True
-    else:
-        # We reached the edge of the board or an empty square, so don't flip any pieces
-        return False
+def flip_pieces(board, move, player):
+    row, col = move
+    directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 
+    for dx, dy in directions:
+        x, y = row + dx, col + dy
+        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != -player:
+            continue
+        x, y = x + dx, y + dy
+        while 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
+            x, y = x + dx, y + dy
+        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != player:
+            continue
+        x, y = row + dx, col + dy
+        while board[x][y] == -player:
+            board[x][y] = player
+            x, y = x + dx, y + dy
                 
     
 
