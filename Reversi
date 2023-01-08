@@ -1,23 +1,27 @@
 import tkinter as tk
 
-
 window = tk.Tk()
-canvas = tk.Canvas(window, width=500, height=500)
+canvas = tk.Canvas(window, width=200, height=200)
 canvas.pack()
 
 player = 1
-cell_size = 60
+cell_size = 20
 
-def switch_player(player):
-    return 1 if player == -1 else -1
+
+def switch_player():
+    global player
+    player = -player
+    
 
 def on_click(event):
     # Convert the mouse click position to a square on the board
-    row = event.x // cell_size
-    col = event.y // cell_size
+    col = event.x // cell_size
+    row = event.y // cell_size
     move = (row, col )
     make_move(board, player, move)
     draw_board()
+    
+
 
 def make_move(board, player, move):
     # Validate the move
@@ -27,29 +31,38 @@ def make_move(board, player, move):
 
     # Update the board with the new piece
     board[move[0]][move[1]] = player
-    print("check")
+    
     # Flip any captured pieces
-    flip_pieces(board, move, player)
-    player = switch_player(player)
+    for dx in [-1, 0, 1]:
+        for dy in [-1, 0, 1]:
+            if dx == 0 and dy == 0:
+                continue
+            flip_pieces(board, move, player, dx, dy)
+    
+    switch_player()
+    draw_board()
+    return True
+    
+    
 
-def flip_pieces(board, move, player):
-    # Flip any sandwiched pieces in each direction
-    directions = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)]
-    for d in directions:
-        x = move[0] + d[0]
-        y = move[1] + d[1]
-        if not (0 <= x < len(board) and 0 <= y < len(board[0])):
-            continue
-        if board[x][y] == -player:
-            x, y = x + d[0], y + d[1]
-            while 0 <= x < len(board) and 0 <= y < len(board[0]) and board[x][y] == -player:
-                x, y = x + d[0], y + d[1]
-            if 0 <= x < len(board) and 0 <= y < len(board[0]) and board[x][y] == player:
-                x = move[0] + d[0]
-                y = move[1] + d[1]
-                while board[x][y] == -player:
-                    board[x][y]
-    print("check")
+def flip_pieces(board, move, player, dx, dy):
+    x, y = move[0] + dy, move[1] + dx
+    if 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
+        # There is an opposing piece in this direction, so flip it and continue
+        board[x][y] = player
+        if flip_pieces(board, move, player, dx, dy):
+            # Pieces were flipped in this direction, so flip the current piece
+            board[move[0]][move[1]] = player
+            return True
+    elif 0 <= x < 8 and 0 <= y < 8 and board[x][y] == player:
+        # We reached a friendly piece, so stop flipping
+        return True
+    else:
+        # We reached the edge of the board or an empty square, so don't flip any pieces
+        return False
+
+                
+    
 
 def is_legal_move(board, move, player):
     # Check that the move is within the bounds of the board
@@ -76,20 +89,25 @@ def is_legal_move(board, move, player):
 
     return False
 
-def draw_cell(row, col, value):
+def draw_cell(row, col, player):
     x1 = col * cell_size
     y1 = row * cell_size
     x2 = x1 + cell_size
     y2 = y1 + cell_size
-    color = "White"
-    if value == 1:
-        color = "Red"
-    elif value == -1:
+    color = "white"
+    if player == 1:
+        color = "red"
+        canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
+    elif player == -1:
         color = "Blue"
-
+        canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
+    elif is_legal_move(board, (row, col), player):
+        canvas.create_oval((x1, y1), (x2, y2), fill="green")
+        canvas.create_rectangle(x1, y1, x2, y2, outline="black")
+    else:
+        canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
     
-    canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
-    canvas.create_oval(((x1, y1), (x2, y2)), fill=color)
+    
 
 board =[
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -110,4 +128,5 @@ def draw_board():
 draw_board()
 
 canvas.bind("<Button-1>", on_click)
+
 window.mainloop()
