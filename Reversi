@@ -4,10 +4,14 @@ from tkinter import Label, Scale, Button
 window = tk.Tk()
 canvas = tk.Canvas(window, width=480, height=600)
 canvas.pack()
-status = Label(canvas); status.place (x=240, y=60)
-skip = Button(canvas, text= "Skip your turn"); skip.place (x= 240,y= 30)
-
 font = ("Arial", 14)
+status = Label(canvas); status.place (x=240, y=60)
+skip = Button(canvas, text= "Skip your turn", font=font); skip.place (x= 240,y= 30)
+scorecard = Label(canvas, font=font, text= ("Score:"), background= "lightgrey"); scorecard.place (x= 10,y= 10)
+redstand = Label(canvas, font=font, background="lightgrey"); redstand.place (x=10, y=40)
+bluestand = Label(canvas, font=font, background= "lightgrey"); bluestand.place (x=10, y=70)
+
+
 player = -1
 cell_size = 60
 
@@ -38,7 +42,7 @@ def make_move(board, player, move):
             if dx == 0 and dy == 0:
                 continue
             flip_pieces(board, move, player, dx, dy)
-    
+    status.configure(text="")
     switch_player(None)
     draw_board()
     return True
@@ -114,19 +118,26 @@ board =[
     [0, 0, 0, -1, 1, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0]
+    [0, 0, 0, 0, 0, 0, 0, 0],
 ]
+def tussenstand():
+    #Calculates the score
+    redcount = sum(x.count(-1) for x in board) 
+    bluecount = sum(y.count(1) for y in board)
+    redstand.configure(text=(f"Red: {redcount}"))
+    bluestand.configure(text=(f"Blue: {bluecount}"))
 
 def draw_board():
     for row in range(len(board)):
         for col in range(len(board[0])):
             draw_cell(row, col, board[row][col])
+            tussenstand()
 
-            
+
+
 
 draw_board()
 skip.bind("<Button-1>", switch_player)
 canvas.bind("<Button-1>", on_click)
-
 window.mainloop()
 
