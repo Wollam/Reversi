@@ -15,9 +15,9 @@ def switch_player():
 
 def on_click(event):
     # Convert the mouse click position to a square on the board
-    col = event.x // cell_size
-    row = event.y // cell_size 
-    move = (col, row)
+    row = event.x // cell_size
+    col = event.y // cell_size 
+    move = (row, col)
     print (move)
     make_move(board, player, move)
     draw_board()
