@@ -11,12 +11,9 @@ font = ("Arial", 14)
 player = -1
 cell_size = 60
 
-
 def switch_player(ea):
     global player
     player = -player
-
-    
 
 def on_click(event):
     # Convert the mouse click position to a square on the board
@@ -25,8 +22,6 @@ def on_click(event):
     move = (row, col)
     make_move(board, player, move)
     draw_board()
-
-
 
 def make_move(board, player, move):
     # Validate the move
@@ -48,8 +43,6 @@ def make_move(board, player, move):
     draw_board()
     return True
     
-    
-
 def flip_pieces(board, move, player, dx, dy):
     x, y = move[0] + dx, move[1] + dy
     if 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
@@ -67,8 +60,6 @@ def flip_pieces(board, move, player, dx, dy):
         return False
 
                 
-    
-
 def is_legal_move(board, move, player):
     # Check that the move is within the bounds of the board
     if not (0 <= move[0] < len(board) and 0 <= move[1] < len(board[0])):
@@ -141,3 +132,4 @@ skip.bind("<Button-1>", switch_player)
 canvas.bind("<Button-1>", on_click)
 
 window.mainloop()
+
