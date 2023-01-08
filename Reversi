@@ -1,7 +1,7 @@
 import tkinter as tk
 
 window = tk.Tk()
-canvas = tk.Canvas(window, width=500, height=500)
+canvas = tk.Canvas(window, width=480, height=600)
 canvas.pack()
 
 player = 1
@@ -15,9 +15,10 @@ def switch_player():
 
 def on_click(event):
     # Convert the mouse click position to a square on the board
-    col = event.x // cell_size
-    row = event.y // cell_size
-    move = (row, col )
+    row = event.x // cell_size
+    col = (event.y - 120) // cell_size 
+    move = (row, col)
+    print (move, event.x, event.y)
     make_move(board, player, move)
     draw_board()
     
@@ -46,7 +47,7 @@ def make_move(board, player, move):
     
 
 def flip_pieces(board, move, player, dx, dy):
-    x, y = move[0] + dy, move[1] + dx
+    x, y = move[0] + dx, move[1] + dy
     if 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
         # There is an opposing piece in this direction, so flip it and continue
         board[x][y] = player
@@ -90,10 +91,10 @@ def is_legal_move(board, move, player):
     return False
 
 def draw_cell(row, col, player):
-    x1 = col * cell_size
-    y1 = row * cell_size
+    x1 = row * cell_size
+    y1 = col * cell_size + 120
     x2 = x1 + cell_size
-    y2 = y1 + cell_size
+    y2 = y1 + cell_size 
     color = "white"
     if player == 1:
         color = "red"
