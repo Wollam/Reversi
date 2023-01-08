@@ -99,14 +99,11 @@ def draw_cell(row, col, player):
         canvas.create_oval((x1, y1), (x2, y2), fill=color)
     elif player == -1:
         color = "Red"
-        canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
-        canvas.create_oval((x1, y1), (x2, y2), fill=color)
-    elif is_legal_move(board, (row, col), player):
-        canvas.create_oval((x1, y1), (x2, y2), fill="green")
-        canvas.create_rectangle(x1, y1, x2, y2, outline="black")
-    else:
-        canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
-    
+
+    canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
+    if is_legal_move(board, (row, col), player): 
+       canvas.create_rectangle(x1, y1, x2, y2, fill="#00FF00")
+    canvas.create_oval(((x1, y1), (x2, y2)), fill=color)
     
 
 board =[
@@ -132,4 +129,5 @@ skip.bind("<Button-1>", switch_player)
 canvas.bind("<Button-1>", on_click)
 
 window.mainloop()
+
 
