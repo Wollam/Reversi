@@ -39,11 +39,7 @@ def make_move(board, player, move):
     board[move[0]][move[1]] = player
     
     # Flip any captured pieces
-    for dx in [-1, 0, 1]:
-        for dy in [-1, 0, 1]:
-            if dx == 0 and dy == 0:
-                continue
-            flip_pieces(board, move, player)
+    flip_pieces(board, move, player)
     
     switch_player(None)
     draw_board()
@@ -136,8 +132,7 @@ def tussenstand():
         status.configure(background="lightgrey", text= "Blue to move",font=font)
     if player == -1:
         status.configure(background="lightgrey", text = "Red to move", font=font)
-    
-
+  
 def draw_board():
     for row in range(len(board)):
         for col in range(len(board[0])):
@@ -148,4 +143,3 @@ draw_board()
 skip.bind("<Button-1>", switch_player)
 canvas.bind("<Button-1>", on_click)
 window.mainloop()
-
