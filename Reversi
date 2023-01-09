@@ -1,21 +1,49 @@
 import tkinter as tk
-from tkinter import Label, Scale, Button
+from tkinter import Label, Scale, Button, OptionMenu, StringVar
 
 window = tk.Tk()
 canvas = tk.Canvas(window, width=480, height=600)
 canvas.pack()
 font = ("Arial", 14)
+
 status = Label(canvas); status.place (x=300, y=70)
-skip = Button(canvas, text= "Skip your turn", font=font); skip.place (x= 300,y= 10)
 scorecard = Label(canvas, font=font, text= ("Score:"), background= "lightgrey"); scorecard.place (x= 10,y= 10)
 redstand = Label(canvas, font=font, background="lightgrey"); redstand.place (x=10, y=40)
 bluestand = Label(canvas, font=font, background= "lightgrey"); bluestand.place (x=10, y=70)
+
 newgame = Button(canvas, text="New game", font=font); newgame.place(x=150, y= 10)
 helpbutton= Button(canvas, text="Help", font=font); helpbutton.place(x=150, y=70)
+skip = Button(canvas, text= "Skip your turn", font=font); skip.place (x= 300,y= 10)
+confirmboard = Button(canvas, text= "Ok!", font=font); confirmboard.place(x=200, y=90)
+
+boardoption = StringVar()
+boardoption.set("6x6")
+boardchoice = OptionMenu(canvas, boardoption, "4x4", "6x6", "8x8", "10x10"); boardchoice.place(x=200, y=70)
 
 
 player = -1
 cell_size = 60
+helpstand = False
+
+board_size = 400
+num_squares = 6
+cell_size = board_size // num_squares
+
+def getboard(ea):
+    # Retrieves the chosen board
+    global num_squares
+    dimensions = boardoption.get()
+    if dimensions == "4x4":
+        num_squares = 4
+    elif dimensions == "6x6":
+        num_squares = 6
+    elif dimensions == "8x8":
+        num_squares = 8
+    elif dimensions == "10x10":
+        num_squares = 10
+    print (num_squares)
+    draw_board()
+
 
 def switch_player(ea):
     global player
@@ -51,12 +79,12 @@ def flip_pieces(board, move, player):
 
     for dx, dy in directions:
         x, y = row + dx, col + dy
-        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != -player:
+        if not (0 <= x < num_squares and 0 <= y < num_squares) or board[x][y] != -player:
             continue
         x, y = x + dx, y + dy
-        while 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
+        while 0 <= x < num_squares and 0 <= y < num_squares and board[x][y] == -player:
             x, y = x + dx, y + dy
-        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != player:
+        if not (0 <= x < num_squares and 0 <= y < num_squares) or board[x][y] != player:
             continue
         x, y = row + dx, col + dy
         while board[x][y] == -player:
@@ -89,37 +117,30 @@ def is_legal_move(board, move, player):
 
     return False
     
+def help(ea):
+    global helpstand
+    if helpstand == False:
+        helpstand =True
+    else:
+        helpstand = False
+    draw_board()
 
-
-def draw_cell(row, col, player):
-    x1 = row * cell_size
-    y1 = col * cell_size + 120
-    x2 = x1 + cell_size
-    y2 = y1 + cell_size 
+def draw_cell(row, col, value):
+    """Draw a cell at the given board position."""
+    square_size = board_size // num_squares
+    x1, y1 = row * square_size, col * square_size + 120
+    x2, y2 = x1 + square_size, y1 + square_size 
     color = "white"
-    if player == 1:
+    if value == 1:
         color = "Blue"
-        canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
-        canvas.create_oval((x1, y1), (x2, y2), fill=color)
-    elif player == -1:
+    elif value == -1:
         color = "Red"
-
     canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
-    if is_legal_move(board, (row, col), player): 
-       canvas.create_rectangle(x1, y1, x2, y2, fill="#00FF00")
+    if is_legal_move(board, (row, col), player) and helpstand: 
+       canvas.create_rectangle(x1, y1, x2, y2, fill="green")
     canvas.create_oval(((x1, y1), (x2, y2)), fill=color)
     
 
-board =[
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, -1, 0, 0, 0],
-    [0, 0, 0, -1, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-]
 def tussenstand():
     #Calculates the score for both teams
     redcount = sum(x.count(-1) for x in board) 
@@ -132,14 +153,25 @@ def tussenstand():
         status.configure(background="lightgrey", text= "Blue to move",font=font)
     if player == -1:
         status.configure(background="lightgrey", text = "Red to move", font=font)
+
   
 def draw_board():
+    global board
+    board = [[0] * num_squares for _ in range(num_squares)]
+    middle = num_squares // 2
+    board[middle][middle] = 1
+    board[middle-1][middle-1] = 1
+    board[middle][middle-1] = -1
+    board[middle-1][middle] = -1
     for row in range(len(board)):
         for col in range(len(board[0])):
             draw_cell(row, col, board[row][col])
             tussenstand()
 
+
 draw_board()
 skip.bind("<Button-1>", switch_player)
 canvas.bind("<Button-1>", on_click)
+helpbutton.bind("<Button-1>", help)
+confirmboard.bind("<Button-1>", getboard)
 window.mainloop()
