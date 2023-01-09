@@ -5,11 +5,13 @@ window = tk.Tk()
 canvas = tk.Canvas(window, width=480, height=600)
 canvas.pack()
 font = ("Arial", 14)
-status = Label(canvas); status.place (x=240, y=70)
-skip = Button(canvas, text= "Skip your turn", font=font); skip.place (x= 240,y= 10)
+status = Label(canvas); status.place (x=300, y=70)
+skip = Button(canvas, text= "Skip your turn", font=font); skip.place (x= 300,y= 10)
 scorecard = Label(canvas, font=font, text= ("Score:"), background= "lightgrey"); scorecard.place (x= 10,y= 10)
 redstand = Label(canvas, font=font, background="lightgrey"); redstand.place (x=10, y=40)
 bluestand = Label(canvas, font=font, background= "lightgrey"); bluestand.place (x=10, y=70)
+newgame = Button(canvas, text="New game", font=font); newgame.place(x=150, y= 10)
+helpbutton= Button(canvas, text="Help", font=font); helpbutton.place(x=150, y=70)
 
 
 player = -1
@@ -41,27 +43,29 @@ def make_move(board, player, move):
         for dy in [-1, 0, 1]:
             if dx == 0 and dy == 0:
                 continue
-            flip_pieces(board, move, player, dx, dy)
+            flip_pieces(board, move, player)
     
     switch_player(None)
     draw_board()
     return True
     
-def flip_pieces(board, move, player, dx, dy):
-    x, y = move[0] + dx, move[1] + dy
-    if 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
-        # There is an opposing piece in this direction, so flip it and continue
-        board[x][y] = player
-        if flip_pieces(board, move, player, dx, dy):
-            # Pieces were flipped in this direction, so flip the current piece
-            board[move[0]][move[1]] = player
-            return True
-    elif 0 <= x < 8 and 0 <= y < 8 and board[x][y] == player:
-        # We reached a friendly piece, so stop flipping
-        return True
-    else:
-        # We reached the edge of the board or an empty square, so don't flip any pieces
-        return False
+def flip_pieces(board, move, player):
+    row, col = move
+    directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+
+    for dx, dy in directions:
+        x, y = row + dx, col + dy
+        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != -player:
+            continue
+        x, y = x + dx, y + dy
+        while 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
+            x, y = x + dx, y + dy
+        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != player:
+            continue
+        x, y = row + dx, col + dy
+        while board[x][y] == -player:
+            board[x][y] = player
+            x, y = x + dx, y + dy
 
                 
 def is_legal_move(board, move, player):
@@ -132,6 +136,7 @@ def tussenstand():
         status.configure(background="lightgrey", text= "Blue to move",font=font)
     if player == -1:
         status.configure(background="lightgrey", text = "Red to move", font=font)
+    
 
 def draw_board():
     for row in range(len(board)):
@@ -143,5 +148,4 @@ draw_board()
 skip.bind("<Button-1>", switch_player)
 canvas.bind("<Button-1>", on_click)
 window.mainloop()
-
 
