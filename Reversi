@@ -23,3 +23,21 @@ def draw_cell(row, col, value):
     if is_legal_move(board, (row, col), player) and helpstand: 
        canvas.create_rectangle(x1, y1, x2, y2, fill="green")
     canvas.create_oval(((x1, y1), (x2, y2)), fill=color)
+
+def flip_pieces(board, move, player):
+    row, col = move
+    directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+
+    for dx, dy in directions:
+        x, y = row + dx, col + dy
+        if not (0 <= x < num_squares and 0 <= y < num_squares) or board[x][y] != -player:
+            continue
+        x, y = x + dx, y + dy
+        while 0 <= x < num_squares and 0 <= y < num_squares and board[x][y] == -player:
+            x, y = x + dx, y + dy
+        if not (0 <= x < num_squares and 0 <= y < num_squares) or board[x][y] != player:
+            continue
+        x, y = row + dx, col + dy
+        while board[x][y] == -player:
+            board[x][y] = player
+            x, y = x + dx, y + dy
