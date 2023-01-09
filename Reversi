@@ -32,8 +32,10 @@ num_squares = 6
 
 def getboard(ea):
     # Retrieves the chosen board
-    global num_squares, cell_size, board
-
+    global num_squares, cell_size, board, player
+    if player == 1:
+        player = -1
+    
     dimensions = boardoption.get()
     if dimensions == "4x4":
         num_squares = 4
