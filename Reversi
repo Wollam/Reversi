@@ -5,15 +5,18 @@ window = tk.Tk()
 canvas = tk.Canvas(window, width=480, height=600)
 canvas.pack()
 font = ("Arial", 14)
-status = Label(canvas); status.place (x=240, y=70)
-skip = Button(canvas, text= "Skip your turn", font=font); skip.place (x= 240,y= 10)
+status = Label(canvas); status.place (x=300, y=70)
+skip = Button(canvas, text= "Skip your turn", font=font); skip.place (x= 300,y= 10)
 scorecard = Label(canvas, font=font, text= ("Score:"), background= "lightgrey"); scorecard.place (x= 10,y= 10)
 redstand = Label(canvas, font=font, background="lightgrey"); redstand.place (x=10, y=40)
 bluestand = Label(canvas, font=font, background= "lightgrey"); bluestand.place (x=10, y=70)
+newgame = Button(canvas, text="New game", font=font); newgame.place(x=150, y= 10)
+helpbutton= Button(canvas, text="Help", font=font); helpbutton.place(x=150, y=70)
 
 
 player = -1
 cell_size = 60
+helpstand = False
 
 def switch_player(ea):
     global player
@@ -31,38 +34,35 @@ def on_click(event):
 def make_move(board, player, move):
     # Validate the move
     if not is_legal_move(board, move, player):
-        status.configure(text = "Error: Illegal move!", font=font, background = "lightgrey")
         return
 
     # Update the board with the new piece
     board[move[0]][move[1]] = player
     
     # Flip any captured pieces
-    for dx in [-1, 0, 1]:
-        for dy in [-1, 0, 1]:
-            if dx == 0 and dy == 0:
-                continue
-            flip_pieces(board, move, player, dx, dy)
+    flip_pieces(board, move, player)
     
     switch_player(None)
     draw_board()
     return True
     
-def flip_pieces(board, move, player, dx, dy):
-    x, y = move[0] + dx, move[1] + dy
-    if 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
-        # There is an opposing piece in this direction, so flip it and continue
-        board[x][y] = player
-        if flip_pieces(board, move, player, dx, dy):
-            # Pieces were flipped in this direction, so flip the current piece
-            board[move[0]][move[1]] = player
-            return True
-    elif 0 <= x < 8 and 0 <= y < 8 and board[x][y] == player:
-        # We reached a friendly piece, so stop flipping
-        return True
-    else:
-        # We reached the edge of the board or an empty square, so don't flip any pieces
-        return False
+def flip_pieces(board, move, player):
+    row, col = move
+    directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+
+    for dx, dy in directions:
+        x, y = row + dx, col + dy
+        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != -player:
+            continue
+        x, y = x + dx, y + dy
+        while 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
+            x, y = x + dx, y + dy
+        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != player:
+            continue
+        x, y = row + dx, col + dy
+        while board[x][y] == -player:
+            board[x][y] = player
+            x, y = x + dx, y + dy
 
                 
 def is_legal_move(board, move, player):
@@ -90,24 +90,30 @@ def is_legal_move(board, move, player):
 
     return False
     
+def help(ea):
+    global helpstand
+    if helpstand == False:
+        helpstand =True
+    else:
+        helpstand = False
+    draw_board()
 
-
-def draw_cell(row, col, player):
+def draw_cell(row, col, value):
+    print (helpstand)
     x1 = row * cell_size
     y1 = col * cell_size + 120
     x2 = x1 + cell_size
     y2 = y1 + cell_size 
     color = "white"
-    if player == 1:
+    if value == 1:
         color = "Blue"
-        canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
-        canvas.create_oval((x1, y1), (x2, y2), fill=color)
-    elif player == -1:
+
+    elif value == -1:
         color = "Red"
 
     canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
-    if is_legal_move(board, (row, col), player): 
-       canvas.create_rectangle(x1, y1, x2, y2, fill="#00FF00")
+    if is_legal_move(board, (row, col), player) and helpstand: 
+       canvas.create_rectangle(x1, y1, x2, y2, fill="green")
     canvas.create_oval(((x1, y1), (x2, y2)), fill=color)
     
 
@@ -133,7 +139,7 @@ def tussenstand():
         status.configure(background="lightgrey", text= "Blue to move",font=font)
     if player == -1:
         status.configure(background="lightgrey", text = "Red to move", font=font)
-
+  
 def draw_board():
     for row in range(len(board)):
         for col in range(len(board[0])):
@@ -143,5 +149,6 @@ def draw_board():
 draw_board()
 skip.bind("<Button-1>", switch_player)
 canvas.bind("<Button-1>", on_click)
+helpbutton.bind("<Button-1>", help)
 window.mainloop()
 
