@@ -6,25 +6,27 @@ canvas = tk.Canvas(window, width=480, height=600)
 canvas.pack()
 font = ("Arial", 13)
 
+#The labels 
 status = Label(canvas); status.place (x=270, y=10)
 scorecard = Label(canvas, font=font, text= ("Score:"), background= "lightgrey"); scorecard.place (x= 400,y= 10)
 redstand = Label(canvas, font=font, background="lightgrey"); redstand.place (x=400, y=40)
 bluestand = Label(canvas, font=font, background= "lightgrey"); bluestand.place (x=400, y=70)
 
+#The buttons
 newgame = Button(canvas, text="New game", font=font); newgame.place(x=10, y= 10)
 helpbutton= Button(canvas, text="Help", font=font); helpbutton.place(x=10, y=70)
 skip = Button(canvas, text= "Skip your turn", font=font); skip.place (x= 270,y= 70)
 confirmboard = Button(canvas, text= "Confirm!", font=font); confirmboard.place(x=120, y=70)
 
+# The dropdown menu
 boardoption = StringVar()
 boardoption.set("Choose boardsize")
 boardchoice = OptionMenu(canvas, boardoption, "4x4", "6x6", "8x8", "10x10"); boardchoice.place(x=120, y=10)
 
-
+# The global variables
 player = -1
 cell_size = 60
 helpstand = False
-
 board_size = 400
 num_squares = 6
 
@@ -44,6 +46,7 @@ def getboard(ea):
     else:
         num_squares = 6
     
+    #Gives the initial board it's values
     board = [[0] * num_squares for _ in range(num_squares)]
     middle = num_squares // 2
     board[middle][middle] = 1
@@ -56,9 +59,11 @@ def getboard(ea):
 
 
 def switch_player(ea):
+    #Switches player 
     global player
     player = -player
     tussenstand()
+    draw_board()
 
 def on_click(event):
     # Convert the mouse click position to a square on the board
@@ -128,6 +133,7 @@ def is_legal_move(board, move, player):
     return False
     
 def help(ea):
+    #Toggles help for the players
     global helpstand
     if helpstand == False:
         helpstand =True
