@@ -41,3 +41,28 @@ def flip_pieces(board, move, player):
         while board[x][y] == -player:
             board[x][y] = player
             x, y = x + dx, y + dy
+
+
+def check_game_over(board, player):
+    """Check if the game is over."""
+    # Check if the board is full
+    if all(val != 0 for row in board for val in row):
+        return 0  # Game is a draw
+
+    # Check if the current player has any legal moves
+    if not any(is_legal_move(board, move, player) for move in get_possible_moves(board, player)):
+        # Switch to the other player and check if they have any legal moves
+        player = -player
+        if not any(is_legal_move(board, move, player) for move in get_possible_moves(board, player)):
+            return 0  # Game is a draw
+        return player  # Other player has no legal moves, current player wins
+    return None  # Game is not over yet
+
+def get_possible_moves(board, player):
+    #makes a list of all possible moves for the current player
+    moves = []
+    for row in range(len(board)):
+        for col in range(len(board[0])):
+            if is_legal_move(board, (row, col), player):
+                moves.append((row, col))
+    return moves
