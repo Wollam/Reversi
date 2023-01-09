@@ -134,3 +134,15 @@ draw_board()
 canvas.bind("<Button-1>", on_click)
 
 window.mainloop()
+
+helpstand = False
+
+def help(ea):
+    global helpstand
+    if helpstand == False:
+        helpstand =True
+    else:
+        helpstand = False
+    draw_board()
+
+helpbutton.bind("<Button-1>", help)
