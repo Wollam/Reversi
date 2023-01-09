@@ -35,7 +35,7 @@ def getboard(ea):
     global num_squares, cell_size, board, player
     if player == 1:
         player = -1
-    
+
     # Retrieves the chosen board
     dimensions = boardoption.get()
     if dimensions == "4x4":
@@ -132,7 +132,6 @@ def is_legal_move(board, move, player):
                 x, y = x + d[0], y + d[1]
             if 0 <= x < len(board) and 0 <= y < len(board[0]) and board[x][y] == player:
                 return True
-
     return False
     
 def help(ea):
@@ -154,11 +153,13 @@ def draw_cell(row, col, value):
         color = "Blue"
     elif value == -1:
         color = "Red"
+    
     canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
     if is_legal_move(board, (row, col), player) and helpstand: 
        canvas.create_rectangle(x1, y1, x2, y2, fill="green")
     canvas.create_oval(((x1, y1), (x2, y2)), fill=color)
-    
+    tussenstand()
+    get_possible_moves(board,player)
 
 def tussenstand():
     #Calculates the score for both teams
@@ -177,10 +178,29 @@ def tussenstand():
   
 def draw_board():
     for row in range(len(board)):
-        for col in range(len(board[0])):
+        for col in range(len(board)):
             draw_cell(row, col, board[row][col])
-            tussenstand()
 
+def get_possible_moves(board, player):
+    #makes a list of all possible moves for the current player
+    moves = []
+    for row in range(len(board)):
+        for col in range(len(board[0])):
+            if is_legal_move(board, (row, col), player):
+                moves.append((row, col))
+
+    # Checks the score
+    redcount = sum(x.count(-1) for x in board) 
+    bluecount = sum(y.count(1) for y in board)
+
+    #Checks if the game is over
+    if len(moves) == 0:  
+        if redcount > bluecount:
+            status.configure(text="Red wins!")
+        elif bluecount > redcount:
+            status.configure(text="Blue wins")
+        elif bluecount == redcount:
+            status.configure(text="It is a draw!")
 
 getboard(None)
 
@@ -190,3 +210,4 @@ helpbutton.bind("<Button-1>", help)
 confirmboard.bind("<Button-1>", getboard)
 newgame.bind("<Button-1>", getboard)
 window.mainloop()
+
