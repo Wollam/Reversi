@@ -1,153 +1,25 @@
-import tkinter as tk
+board_size = 400
+num_squares = 10
+cell_size = board_size // num_squares
+board = [[0] * num_squares for _ in range(num_squares)]
+middle = num_squares // 2
+board[middle][middle] = 1
+board[middle-1][middle-1] = 1
+board[middle][middle-1] = -1
+board[middle-1][middle] = -1
 
-window = tk.Tk()
-canvas = tk.Canvas(window, width=500, height=500)
-canvas.pack()
-
-player = 1
-cell_size = 60
-
-
-def switch_player():
-    global player
-    player = -player
-    
-
-def on_click(event):
-    # Convert the mouse click position to a square on the board
-    row = event.x // cell_size
-    col = event.y // cell_size 
-    move = (row, col)
-    make_move(board, player, move)
-    draw_board()
-    
-
-
-def make_move(board, player, move):
-    # Validate the move
-    if not is_legal_move(board, move, player):
-        print("Illegal move!")
-        return
-
-    # Update the board with the new piece
-    board[move[0]][move[1]] = player
-    
-    # Flip any captured pieces
-   
-    flip_pieces(board, move, player)
-    
-    switch_player()
-    draw_board()
-    return True
-
-def flip_pieces(board, move, player):
-    row, col = move
-    directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
-
-    for dx, dy in directions:
-        x, y = row + dx, col + dy
-        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != -player:
-            continue
-        x, y = x + dx, y + dy
-        while 0 <= x < 8 and 0 <= y < 8 and board[x][y] == -player:
-            x, y = x + dx, y + dy
-        if not (0 <= x < 8 and 0 <= y < 8) or board[x][y] != player:
-            continue
-        x, y = row + dx, col + dy
-        while board[x][y] == -player:
-            board[x][y] = player
-            x, y = x + dx, y + dy
-            
-
-    
-    
-    
-
-
-        
-        
-
-
-def is_legal_move(board, move, player):
-    # Check that the move is within the bounds of the board
-    if not (0 <= move[0] < len(board) and 0 <= move[1] < len(board[0])):
-        return False
-
-    # Check that the square is empty
-    if board[move[0]][move[1]] != 0:
-        return False
-
-    # Check for any sandwiched pieces in each direction
-    directions = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)]
-    for d in directions:
-        x = move[0] + d[0]
-        y = move[1] + d[1]
-        if not (0 <= x < len(board) and 0 <= y < len(board[0])):
-            continue
-        if board[x][y] == -player:
-            x, y = x + d[0], y + d[1]
-            while 0 <= x < len(board) and 0 <= y < len(board[0]) and board[x][y] == -player:
-                x, y = x + d[0], y + d[1]
-            if 0 <= x < len(board) and 0 <= y < len(board[0]) and board[x][y] == player:
-                return True
-
-    return False
 
 def draw_cell(row, col, value):
-    x1 = row * cell_size
-    y1 = col * cell_size
-    x2 = x1 + cell_size
-    y2 = y1 + cell_size
-    color = "White"
+    """Draw a cell at the given board position."""
+    square_size = board_size // num_squares
+    x1, y1 = row * square_size, col * square_size + 120
+    x2, y2 = x1 + square_size, y1 + square_size 
+    color = "white"
     if value == 1:
-        color = "Red"
-    elif value == -1:
         color = "Blue"
-   
-    
+    elif value == -1:
+        color = "Red"
     canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
-    if is_legal_move(board, (row, col), player) and help:
-       canvas.create_rectangle(x1, y1, x2, y2, fill="#00FF00")
+    if is_legal_move(board, (row, col), player) and helpstand: 
+       canvas.create_rectangle(x1, y1, x2, y2, fill="green")
     canvas.create_oval(((x1, y1), (x2, y2)), fill=color)
-    
-
-board =[
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, -1, 0, 0, 0],
-    [0, 0, 0, -1, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0]
-]
-
-
-
-def draw_board():
-    for row in range(len(board)):
-        for col in range(len(board[0])):
-            draw_cell(row, col, board[row][col])
-
-draw_board()
-
-canvas.bind("<Button-1>", on_click)
-
-window.mainloop()
-
-helpstand = False
-
-def help(ea):
-    global helpstand
-    if helpstand == False:
-        helpstand =True
-    else:
-        helpstand = False
-    draw_board()
-
-canvas.create_rectangle(x1, y1, x2, y2, fill="White", outline="black")
-    if is_legal_move(board, (row, col), player) and helpstand:
-       canvas.create_rectangle(x1, y1, x2, y2, fill="#00FF00")
-    canvas.create_oval(((x1, y1), (x2, y2)), fill=color)
-
-helpbutton.bind("<Button-1>", help)
