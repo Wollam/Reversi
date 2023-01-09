@@ -31,11 +31,12 @@ board_size = 400
 num_squares = 6
 
 def getboard(ea):
-    # Retrieves the chosen board
+    # Sets the starting player to red in case the previous game was ended on blue's turn
     global num_squares, cell_size, board, player
     if player == 1:
         player = -1
     
+    # Retrieves the chosen board
     dimensions = boardoption.get()
     if dimensions == "4x4":
         num_squares = 4
