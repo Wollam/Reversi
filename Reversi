@@ -94,7 +94,8 @@ def make_move(board, player, move):
 def flip_pieces(board, move, player):
     row, col = move
     directions = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
-
+    #takes all directions from where the move was made and checks if it needs to flip any of the pieces
+    
     for dx, dy in directions:
         x, y = row + dx, col + dy
         if not (0 <= x < num_squares and 0 <= y < num_squares) or board[x][y] != -player:
