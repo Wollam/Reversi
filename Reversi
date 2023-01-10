@@ -16,7 +16,7 @@ bluestand = Label(canvas, font=font, background= "lightgrey"); bluestand.place (
 newgame = Button(canvas, text="New game", font=font); newgame.place(x=10, y= 10)
 helpbutton= Button(canvas, text="Help", font=font); helpbutton.place(x=10, y=70)
 skip = Button(canvas, text= "Skip your turn", font=font); skip.place (x= 270,y= 70)
-confirmboard = Button(canvas, text= "Confirm!", font=font); confirmboard.place(x=120, y=70)
+confirmboard = Button(canvas, text= "Confirm board", font=font); confirmboard.place(x=120, y=70)
 
 # The dropdown menu
 boardoption = StringVar()
